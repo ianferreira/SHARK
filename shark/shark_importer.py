@@ -125,6 +125,7 @@ class SharkImporter:
         self, dir, model_name, mlir_data, func_name, inputs, outputs
     ):
         import numpy as np
+        from chardet import detect
 
         inputs_name = "inputs.npz"
         outputs_name = "golden_out.npz"
@@ -138,9 +139,11 @@ class SharkImporter:
         if self.frontend == "torch":
             mlir_str = mlir_data.operation.get_asm()
         elif self.frontend == "tf":
-            mlir_str = mlir_data.decode("utf-8")
+            enc = detect(mlir_str)["encoding"]
+            mlir_str = mlir_data.decode(enc)
         elif self.frontend == "tflite":
-            mlir_str = mlir_data.decode("utf-8")
+            enc = detect(mlir_str)["encoding"]
+            mlir_str = mlir_data.decode(enc)
         with open(os.path.join(dir, model_name_mlir), "w") as mlir_file:
             mlir_file.write(mlir_str)
 
